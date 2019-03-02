@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	orgService "scytale/organization/organization"
-	mocks "scytale/organization/mocks"
+	orgService "github.com/liwei2001/go-grpc/organization"
+	mocks "github.com/liwei2001/go-grpc/mocks"
 )
 
 

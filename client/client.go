@@ -10,7 +10,7 @@ import (
 	"strconv"
     "math/rand"
     "google.golang.org/grpc"
-	pb "scytale/organization/organization"
+	pb "github.com/liwei2001/go-grpc/organization"
 )
 
 var (
