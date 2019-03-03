@@ -1,0 +1,12 @@
+FROM golang:1.9.1
+
+WORKDIR /go/src/github.com/liwei2001/go-grpc/server
+COPY server .
+COPY organization ../organization
+
+RUN go get -v ./...
+RUN go install -v ./...
+
+EXPOSE 3000
+
+CMD [ "server" ]
