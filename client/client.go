@@ -178,41 +178,45 @@ func main() {
     args := os.Args
     numArgs := len(args)
 
-    if args[1] == "CreateOrganization" {
-      if numArgs != 4 {
-        log.Printf("Error: Number of argument does not match")
-      } else {
-        printOrganization(client, &pb.CreateOrganizationRequest{Name: args[2], Description: args[3]})
-      }
-    } else if args[1] == "FetchOrganizationList" {
-        if numArgs != 2 {
+    if numArgs == 1 {
+      log.Printf("Please select one of the above actions and supply as your run arguments. For example: ./test_run CreateOrganization \"Test org\", \"Test org description\"")
+    } else {
+
+        if args[1] == "CreateOrganization" {
+          if numArgs != 4 {
             log.Printf("Error: Number of argument does not match")
           } else {
-            organizationListResponse, err := getOrganizationList(client, &pb.Empty{})
-            if err != nil {
-                    log.Fatalf("%v.FetchOrganizationList(_, _) = _, %v: ", client, err)
-            } else {
-                printOrganizationList(organizationListResponse)
-            }
+            printOrganization(client, &pb.CreateOrganizationRequest{Name: args[2], Description: args[3]})
           }
-    } else if args[1] == "CreateUser" {
-          if numArgs != 4 {
-              log.Printf("Error: Number of argument does not match")
-            } else {
-                printUser(client, &pb.CreateUserRequest{OrganizationId: args[2], Name: args[3]})
-            }
-      } else if args[1] == "FetchUserList" {
+        } else if args[1] == "FetchOrganizationList" {
             if numArgs != 2 {
                 log.Printf("Error: Number of argument does not match")
               } else {
-                printUserList(client, &pb.Empty{})
+                organizationListResponse, err := getOrganizationList(client, &pb.Empty{})
+                if err != nil {
+                        log.Fatalf("%v.FetchOrganizationList(_, _) = _, %v: ", client, err)
+                } else {
+                    printOrganizationList(organizationListResponse)
+                }
               }
-    } else if args[1] == "FetchUserListByOrganization" {
-          if numArgs != 3 {
-              log.Printf("Error: Number of argument does not match")
-            } else {
-              printUserListByOrganization(client, &pb.ByOrganizationRequest{OrganizationId : args[2]})
-            }
-      }
-
+        } else if args[1] == "CreateUser" {
+              if numArgs != 4 {
+                  log.Printf("Error: Number of argument does not match")
+                } else {
+                    printUser(client, &pb.CreateUserRequest{OrganizationId: args[2], Name: args[3]})
+                }
+          } else if args[1] == "FetchUserList" {
+                if numArgs != 2 {
+                    log.Printf("Error: Number of argument does not match")
+                  } else {
+                    printUserList(client, &pb.Empty{})
+                  }
+        } else if args[1] == "FetchUserListByOrganization" {
+              if numArgs != 3 {
+                  log.Printf("Error: Number of argument does not match")
+                } else {
+                  printUserListByOrganization(client, &pb.ByOrganizationRequest{OrganizationId : args[2]})
+                }
+          }
+    }
 }

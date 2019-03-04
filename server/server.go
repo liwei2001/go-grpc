@@ -20,14 +20,14 @@ var (
 )
 
 type organization struct {
-  id string
-  name string
+  id string  //uniquely generated organizationId
+  name string  //allow organization name to be the same, can add logic to disallow this as well
   description string
 }
 
 type userInfo struct {
-  id string
-  name string
+  id string  //uniquely generated userId
+  name string //allow user name to be the same, can add logic to disallow this as well
 }
 
 type organizationServiceServer struct {
