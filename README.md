@@ -3,7 +3,6 @@ This is a simple go-grpc implementation of the following:
 service Organization {
 	rpc CreateOrganization(CreateOrganizationRequest) returns (OrganizationResponse) {}
 	rpc FetchOrganizationList(Empty) returns (OrganizationListResponse) {}
-
 	rpc CreateUser(CreateUserRequest) returns (UserResponse) {}
 	rpc FetchUserList(Empty) returns (UserListResponse) {}
 	rpc FetchUserListByOrganization(ByOrganizationRequest) returns (UserListResponse) {}
