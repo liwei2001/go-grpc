@@ -9,12 +9,13 @@ import (
 	"time"
 	"strconv"
     "math/rand"
+    "os"
     "google.golang.org/grpc"
 	pb "github.com/liwei2001/go-grpc/organization"
 )
 
 var (
-	serverAddr         = flag.String("server_addr", "127.0.0.1:10000", "The server address in the format of host:port")
+	serverAddr         = flag.String("server_addr", "127.0.0.1:3000", "The server address in the format of host:port")
 )
 
 func printOrganization(client pb.OrganizationServiceClient, createOrganizationRequest *pb.CreateOrganizationRequest) {
@@ -119,7 +120,7 @@ func printUserListByOrganization(client pb.OrganizationServiceClient, byOrganiza
     if len(users) > 0 {
         fmt.Printf("Id\t\t\tOrganizationId\t\t\tName\n")
     } else {
-        fmt.Println("No users found")
+        fmt.Println("No users found for this organization")
     }
 
     for _, user := range users {
@@ -140,21 +141,78 @@ func main() {
 
     client := pb.NewOrganizationServiceClient(conn)
 
+    log.Printf("DEMO: Creating new organizations")
+
     for i := 0; i < 5; i++ {
         printOrganization(client, &pb.CreateOrganizationRequest{Name: "Michael's Org " + strconv.Itoa(i+1), Description: "Michael's Testing Org " + strconv.Itoa(i+1)})
     }
 
     organizationListResponse, err := getOrganizationList(client, &pb.Empty{})
+
+    log.Printf("DEMO: List all organizations")
     printOrganizationList(organizationListResponse)
+
+    log.Printf("DEMO: Creating new users")
 
     for i := 0; i < 20; i++ {
         printUser(client, &pb.CreateUserRequest{OrganizationId: getRandomOrganizationId(organizationListResponse), Name: "Random User " + strconv.Itoa(i+1)})
     }
 
+    log.Printf("DEMO: List all users")
     printUserList(client, &pb.Empty{})
 
+    log.Printf("DEMO: List all users in a specific organization")
     randomOrgId := getRandomOrganizationId(organizationListResponse)
-    log.Printf("generated random organizationId for user is " + randomOrgId)
+    log.Printf("generated random organizationId to get corresponding user list: " + randomOrgId)
 
     printUserListByOrganization(client, &pb.ByOrganizationRequest{OrganizationId : randomOrgId})
+
+    log.Printf("*********************************************")
+    log.Printf("List of Actions:")
+    log.Printf("1. CreateOrganization {name} {description}")
+    log.Printf("2. FetchOrganizationList")
+    log.Printf("3. CreateUser {organization_id} {name}")
+    log.Printf("4. FetchUserList")
+    log.Printf("5. FetchUserListByOrganization {organization_id}")
+
+    args := os.Args
+    numArgs := len(args)
+
+    if args[1] == "CreateOrganization" {
+      if numArgs != 4 {
+        log.Printf("Error: Number of argument does not match")
+      } else {
+        printOrganization(client, &pb.CreateOrganizationRequest{Name: args[2], Description: args[3]})
+      }
+    } else if args[1] == "FetchOrganizationList" {
+        if numArgs != 2 {
+            log.Printf("Error: Number of argument does not match")
+          } else {
+            organizationListResponse, err := getOrganizationList(client, &pb.Empty{})
+            if err != nil {
+                    log.Fatalf("%v.FetchOrganizationList(_, _) = _, %v: ", client, err)
+            } else {
+                printOrganizationList(organizationListResponse)
+            }
+          }
+    } else if args[1] == "CreateUser" {
+          if numArgs != 4 {
+              log.Printf("Error: Number of argument does not match")
+            } else {
+                printUser(client, &pb.CreateUserRequest{OrganizationId: args[2], Name: args[3]})
+            }
+      } else if args[1] == "FetchUserList" {
+            if numArgs != 2 {
+                log.Printf("Error: Number of argument does not match")
+              } else {
+                printUserList(client, &pb.Empty{})
+              }
+    } else if args[1] == "FetchUserListByOrganization" {
+          if numArgs != 3 {
+              log.Printf("Error: Number of argument does not match")
+            } else {
+              printUserListByOrganization(client, &pb.ByOrganizationRequest{OrganizationId : args[2]})
+            }
+      }
+
 }

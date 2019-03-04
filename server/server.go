@@ -7,9 +7,9 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
 	"net"
+    "fmt"
     "github.com/rs/xid"
     "google.golang.org/grpc"
 	pb "github.com/liwei2001/go-grpc/organization"
@@ -35,8 +35,20 @@ type organizationServiceServer struct {
     users map[string][]userInfo  //organization_id as key
 }
 
+type argError struct {
+   message string
+}
+
+func (e *argError) Error() string {
+    return fmt.Sprintf("%s", e.message)
+}
 
 func (o *organizationServiceServer) CreateOrganization(ctx context.Context, request *pb.CreateOrganizationRequest) (*pb.OrganizationResponse, error) {
+
+    if len(request.Name) == 0 {
+        return nil, &argError{"Orgnaization name cannot be empty"}
+    }
+
     newOrgId := xid.New().String()
 
     newOrganization := organization {
@@ -74,6 +86,10 @@ func (o *organizationServiceServer) FetchOrganizationList(ctx context.Context, e
 }
 
 func (o *organizationServiceServer) CreateUser(ctx context.Context, request *pb.CreateUserRequest) (*pb.UserResponse, error) {
+    if len(request.Name) == 0 {
+            return nil, &argError{"User name cannot be empty"}
+    }
+
     newUserId := xid.New().String()
 
     newUserInfo := userInfo {
@@ -81,17 +97,30 @@ func (o *organizationServiceServer) CreateUser(ctx context.Context, request *pb.
         name: request.Name,
     }
 
-    userInfoList := o.users[request.OrganizationId]
+    organizationExists := false
 
-    userInfoList = append(userInfoList, newUserInfo)
+    for _, org := range o.organizations {
+        if org.id == request.OrganizationId {
+            organizationExists = true
+        }
+    }
 
-    o.users[request.OrganizationId] = userInfoList
+    if organizationExists {
 
-    return &pb.UserResponse {
-        Id: newUserId,
-        OrganizationId: request.OrganizationId,
-        Name: request.Name,
-    }, nil
+        userInfoList := o.users[request.OrganizationId]
+
+        userInfoList = append(userInfoList, newUserInfo)
+
+        o.users[request.OrganizationId] = userInfoList
+
+        return &pb.UserResponse {
+            Id: newUserId,
+            OrganizationId: request.OrganizationId,
+            Name: request.Name,
+        }, nil
+    } else {
+        return nil, &argError{"No corresponding organization exists"}
+    }
 }
 
 func (o *organizationServiceServer) FetchUserList(ctx context.Context, empty *pb.Empty) (*pb.UserListResponse, error) {
@@ -118,21 +147,36 @@ func (o *organizationServiceServer) FetchUserList(ctx context.Context, empty *pb
 func (o *organizationServiceServer) FetchUserListByOrganization(ctx context.Context, request *pb.ByOrganizationRequest) (*pb.UserListResponse, error) {
     var users []*pb.UserResponse
 
-    userInfoList := o.users[request.OrganizationId]
+    organizationExists := false
 
-    for i := 0; i < len(userInfoList); i++ {
-        userRes := &pb.UserResponse{
-            Id:         userInfoList[i].id,
-            OrganizationId: request.OrganizationId,
-            Name:     userInfoList[i].name,
+    for _, org := range o.organizations {
+        if org.id == request.OrganizationId {
+            organizationExists = true
         }
-
-        users = append(users, userRes)
     }
 
-    return &pb.UserListResponse{
-        Users: users,
-    }, nil
+    if organizationExists {
+
+        userInfoList := o.users[request.OrganizationId]
+
+        for i := 0; i < len(userInfoList); i++ {
+            userRes := &pb.UserResponse{
+                Id:         userInfoList[i].id,
+                OrganizationId: request.OrganizationId,
+                Name:     userInfoList[i].name,
+            }
+
+            users = append(users, userRes)
+        }
+
+        return &pb.UserListResponse{
+            Users: users,
+        }, nil
+    } else {
+        return &pb.UserListResponse{
+            Users: users,
+        }, &argError{"No corresponding organization exists"}
+    }
 }
 
 
@@ -149,11 +193,15 @@ func newServer() *organizationServiceServer {
 func main() {
 
     flag.Parse()
-    lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
+    //lis, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", *port))
+    lis, err := net.Listen("tcp", ":3000")
+
     if err != nil {
         log.Fatalf("failed to listen: %v", err)
     }
-    log.Println("Listening on ", *port)
+    //log.Println("Listening on ", *port)
+    log.Println("Listening on port 3000")
+
     var opts []grpc.ServerOption
 
     server := grpc.NewServer(opts...)
