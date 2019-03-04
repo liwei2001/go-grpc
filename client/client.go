@@ -184,13 +184,13 @@ func main() {
 
         if args[1] == "CreateOrganization" {
           if numArgs != 4 {
-            log.Printf("Error: Number of argument does not match")
+            log.Printf("ERROR: Number of argument does not match")
           } else {
             printOrganization(client, &pb.CreateOrganizationRequest{Name: args[2], Description: args[3]})
           }
         } else if args[1] == "FetchOrganizationList" {
             if numArgs != 2 {
-                log.Printf("Error: Number of argument does not match")
+                log.Printf("ERROR: Number of argument does not match")
               } else {
                 organizationListResponse, err := getOrganizationList(client, &pb.Empty{})
                 if err != nil {
@@ -201,22 +201,24 @@ func main() {
               }
         } else if args[1] == "CreateUser" {
               if numArgs != 4 {
-                  log.Printf("Error: Number of argument does not match")
+                  log.Printf("ERROR: Number of argument does not match")
                 } else {
                     printUser(client, &pb.CreateUserRequest{OrganizationId: args[2], Name: args[3]})
                 }
           } else if args[1] == "FetchUserList" {
                 if numArgs != 2 {
-                    log.Printf("Error: Number of argument does not match")
+                    log.Printf("ERROR: Number of argument does not match")
                   } else {
                     printUserList(client, &pb.Empty{})
                   }
         } else if args[1] == "FetchUserListByOrganization" {
               if numArgs != 3 {
-                  log.Printf("Error: Number of argument does not match")
+                  log.Printf("ERROR: Number of argument does not match")
                 } else {
                   printUserListByOrganization(client, &pb.ByOrganizationRequest{OrganizationId : args[2]})
                 }
+          } else {
+            log.Printf("ERROR: Action name does not match, it's case sensitive")
           }
     }
 }
