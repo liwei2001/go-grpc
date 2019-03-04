@@ -141,45 +141,48 @@ func main() {
 
     client := pb.NewOrganizationServiceClient(conn)
 
-    log.Printf("DEMO: Creating new organizations")
-
-    for i := 0; i < 5; i++ {
-        printOrganization(client, &pb.CreateOrganizationRequest{Name: "Michael's Org " + strconv.Itoa(i+1), Description: "Michael's Testing Org " + strconv.Itoa(i+1)})
-    }
-
-    organizationListResponse, err := getOrganizationList(client, &pb.Empty{})
-
-    log.Printf("DEMO: List all organizations")
-    printOrganizationList(organizationListResponse)
-
-    log.Printf("DEMO: Creating new users")
-
-    for i := 0; i < 20; i++ {
-        printUser(client, &pb.CreateUserRequest{OrganizationId: getRandomOrganizationId(organizationListResponse), Name: "Random User " + strconv.Itoa(i+1)})
-    }
-
-    log.Printf("DEMO: List all users")
-    printUserList(client, &pb.Empty{})
-
-    log.Printf("DEMO: List all users in a specific organization")
-    randomOrgId := getRandomOrganizationId(organizationListResponse)
-    log.Printf("generated random organizationId to get corresponding user list: " + randomOrgId)
-
-    printUserListByOrganization(client, &pb.ByOrganizationRequest{OrganizationId : randomOrgId})
-
-    log.Printf("*********************************************")
-    log.Printf("List of Actions:")
-    log.Printf("1. CreateOrganization {name} {description}")
-    log.Printf("2. FetchOrganizationList")
-    log.Printf("3. CreateUser {organization_id} {name}")
-    log.Printf("4. FetchUserList")
-    log.Printf("5. FetchUserListByOrganization {organization_id}")
-
     args := os.Args
     numArgs := len(args)
 
     if numArgs == 1 {
-      log.Printf("Please select one of the above actions and supply as your run arguments. For example: ./test_run CreateOrganization \"Test org\", \"Test org description\"")
+	    log.Printf("DEMO: Creating new organizations")
+
+	    for i := 0; i < 5; i++ {
+		    printOrganization(client, &pb.CreateOrganizationRequest{Name: "Michael's Org " + strconv.Itoa(i+1), Description: "Michael's Testing Org " + strconv.Itoa(i+1)})
+	    }
+
+	    organizationListResponse, _ := getOrganizationList(client, &pb.Empty{})
+
+	    log.Printf("DEMO: List all organizations")
+	    printOrganizationList(organizationListResponse)
+
+	    log.Printf("DEMO: Creating new users")
+
+	    for i := 0; i < 20; i++ {
+		    printUser(client, &pb.CreateUserRequest{OrganizationId: getRandomOrganizationId(organizationListResponse), Name: "Random User " + strconv.Itoa(i+1)})
+	    }
+
+	    log.Printf("DEMO: List all users")
+	    printUserList(client, &pb.Empty{})
+
+	    log.Printf("DEMO: List all users in a specific organization")
+	    randomOrgId := getRandomOrganizationId(organizationListResponse)
+	    log.Printf("generated random organizationId to get corresponding user list: " + randomOrgId)
+
+	    printUserListByOrganization(client, &pb.ByOrganizationRequest{OrganizationId : randomOrgId})
+
+
+	    log.Printf("*********************************************")
+	    log.Printf("List of Actions:")
+	    log.Printf("1. CreateOrganization {name} {description}")
+	    log.Printf("2. FetchOrganizationList")
+	    log.Printf("3. CreateUser {organization_id} {name}")
+	    log.Printf("4. FetchUserList")
+	    log.Printf("5. FetchUserListByOrganization {organization_id}")
+	    log.Printf("*********************************************")
+
+	    log.Printf("Please select one of the above actions and supply as your run arguments. For example: ./test_run CreateOrganization \"Test org\", \"Test org description\"")
+
     } else {
 
         if args[1] == "CreateOrganization" {
